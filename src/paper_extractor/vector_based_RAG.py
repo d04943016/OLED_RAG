@@ -340,8 +340,10 @@ class MyVectorDatabaseWithEmbeddedModel(MyVectorDatabase):
              query:str,
              k:int = 5,
              get_distance_and_index:bool = False,
+             format:Optional[str] = None,
         ) -> List[Document]:
         """Query the database."""
+        format = 'chunks' if format is None else format
 
         # generate query embeddings
         embedding = self.embeddings_model.embed_query(query)
@@ -353,10 +355,22 @@ class MyVectorDatabaseWithEmbeddedModel(MyVectorDatabase):
         answers = []
         for result in results:
             document_path, document_name, chunk_number, _ = result
-            tmp_chunks = self.process_pdf_to_chunks(document_path, document_name)
-            
-            answers.append(tmp_chunks[chunk_number])
-        
+
+            if format.upper() in ('CHUNKS', 'CHUNK'):
+                chunks = self.process_pdf_to_chunks(document_path, document_name)
+                answers.append(chunks[chunk_number])
+            elif format.upper() in ('EMBEDDINGS', 'EMBEDDING'): 
+                answers.append(embedding)
+            elif format.upper() in ('DOCUMENTS', 'DOCUMENT', 'DOC'):
+                docs = PyPDFLoader( os.path.join(document_path, document_name) ).load()
+                answers.append( docs )
+            elif format.upper() in ('PAGE', 'PAGES'):
+                chunk = self.process_pdf_to_chunks(document_path, document_name)[chunk_number]
+                docs = PyPDFLoader( os.path.join(document_path, document_name) ).load()
+                answers.append( docs[ chunk.metadata['page'] ] )
+            else:
+                raise ValueError(f"Unknown format: {format}")
+
         if get_distance_and_index:
             return answers, D, I
         return answers
