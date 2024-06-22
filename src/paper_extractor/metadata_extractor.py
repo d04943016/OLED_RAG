@@ -312,11 +312,11 @@ def get_metadata(
     return metadata
 
 """ database """
-def create_new_database(database_path:str, datapath_name:str) -> sqlite3.Connection:
+def create_new_database(database_path:str, database_name:str) -> sqlite3.Connection:
     if not os.path.exists(database_path):
         os.makedirs(database_path)
     
-    conn = sqlite3.connect( os.path.join(database_path, f'{datapath_name}.db') )
+    conn = sqlite3.connect( os.path.join(database_path, f'{database_name}.db') )
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -348,7 +348,7 @@ def create_new_database(database_path:str, datapath_name:str) -> sqlite3.Connect
     
 def get_database_connection(
         database_path:str,
-        datapath_name:str,
+        database_name:str,
         create_new_if_not_exist:bool = False,
     ) -> sqlite3.Connection:
     """
@@ -356,14 +356,14 @@ def get_database_connection(
 
     usage
     -----
-    conn = get_database_connection(database_path, datapath_name, create_new_if_not_exist)
+    conn = get_database_connection(database_path, database_name, create_new_if_not_exist)
 
     Parameters
     ----------
     database_path : str
         The path of the database.
 
-    datapath_name : str
+    database_name : str
         The name of the database.
 
     create_new_if_not_exist : bool
@@ -375,11 +375,11 @@ def get_database_connection(
         The connection to the database.
         
     """
-    if not os.path.exists( os.path.join(database_path, f'{datapath_name}.db') ):
+    if not os.path.exists( os.path.join(database_path, f'{database_name}.db') ):
         if create_new_if_not_exist:
-            return create_new_database(database_path = database_path, datapath_name = datapath_name)
-        raise FileNotFoundError(f'The database {datapath_name}.db does not exist in the path {database_path}')
-    conn = sqlite3.connect( os.path.join(database_path, f'{datapath_name}.db') )
+            return create_new_database(database_path = database_path, database_name = database_name)
+        raise FileNotFoundError(f'The database {database_name}.db does not exist in the path {database_path}')
+    conn = sqlite3.connect( os.path.join(database_path, f'{database_name}.db') )
     return conn
 
 def insert_metadata(conn:sqlite3.Connection,
@@ -555,7 +555,7 @@ def convert_database_to_dataframe(
 
 def get_database(
         database_path:str,
-        datapath_name:str,
+        database_name:str,
         create_new_if_not_exist:bool = False,
         type:str = 'dataframe',
     ) -> Any:
@@ -564,14 +564,14 @@ def get_database(
     
     usage
     -----
-    conn = get_database(database_path, datapath_name, create_new_if_not_exist, type)
+    conn = get_database(database_path, database_name, create_new_if_not_exist, type)
 
     Parameters
     ----------
     database_path : str
         The path of the database.
     
-    datapath_name : str
+    database_name : str
         The name of the database.
     
     create_new_if_not_exist : bool
@@ -587,7 +587,7 @@ def get_database(
 
     """
     conn = get_database_connection(database_path = database_path, 
-                                   datapath_name = datapath_name, 
+                                   database_name = database_name, 
                                    create_new_if_not_exist = create_new_if_not_exist)
 
     if type.upper() in ('DATAFRAME', 'DF'):
