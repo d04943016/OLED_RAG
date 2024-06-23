@@ -200,6 +200,8 @@ class MyVectorDatabase:
             raise ValueError(f"ID {id} (type={type(id)}) is not in the database (table={self._sqlite3_table_name}).")
         
         id, document_path, document_name, chunk_number, embedding = row
+
+        embedding = np.frombuffer(embedding, dtype=np.float32)
         return id, document_path, document_name, chunk_number, embedding
     
     def query(self,
